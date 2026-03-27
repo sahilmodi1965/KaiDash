@@ -3,174 +3,260 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KaiDash 💬</title>
+  <title>KaiDash 🎯</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; height: 100vh; display: flex; flex-direction: column; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; height: 100vh; overflow: hidden; }
 
-    #login { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 20px; }
-    #login h1 { font-size: 2.4rem; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    #login p { color: #888; font-size: 0.95rem; }
-    .name-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 280px; }
-    .name-btn { padding: 14px; border: 2px solid #333; border-radius: 12px; background: #1a1a1a; color: #e0e0e0; font-size: 1rem; cursor: pointer; transition: all 0.2s; }
-    .name-btn:hover { border-color: #667eea; background: #1f1f2e; transform: scale(1.04); }
+    /* SCREENS */
+    .screen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+    .screen.active { display: flex; }
 
-    #chat { display: none; flex-direction: column; height: 100vh; }
-    #chat-header { padding: 16px 20px; background: #1a1a1a; border-bottom: 1px solid #2a2a2a; display: flex; justify-content: space-between; align-items: center; }
-    #chat-header h2 { font-size: 1.1rem; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    #chat-header span { color: #888; font-size: 0.85rem; }
-    #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 8px; }
-    .msg { max-width: 75%; padding: 10px 14px; border-radius: 16px; font-size: 0.95rem; line-height: 1.4; animation: fadeIn 0.2s ease; }
-    .msg .author { font-size: 0.75rem; font-weight: 600; margin-bottom: 2px; }
-    .msg.mine { align-self: flex-end; background: #667eea; color: #fff; border-bottom-right-radius: 4px; }
-    .msg.mine .author { display: none; }
-    .msg.theirs { align-self: flex-start; background: #1e1e2e; border-bottom-left-radius: 4px; }
-    .msg.system { align-self: center; background: none; color: #555; font-size: 0.8rem; padding: 4px; }
+    /* LOGIN */
+    #login { gap: 20px; background: linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1600&q=80') center/cover no-repeat; }
+    #login h1 { font-size: 2.6rem; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    #login p { color: #aaa; font-size: 0.95rem; }
+    .name-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; width: 360px; }
+    .name-btn { padding: 14px; border: 2px solid rgba(255,255,255,0.15); border-radius: 12px; background: rgba(255,255,255,0.08); backdrop-filter: blur(12px); color: #e0e0e0; font-size: 1rem; cursor: pointer; transition: all 0.2s; }
+    .name-btn:hover { border-color: #667eea; background: rgba(102,126,234,0.2); transform: scale(1.04); }
+
+    /* AUTH MODAL */
+    #auth-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 10; align-items: center; justify-content: center; }
+    #auth-modal.active { display: flex; }
+    #auth-box { background: #1a1a1a; border: 1px solid #333; border-radius: 16px; padding: 30px; width: 320px; text-align: center; }
+    #auth-box h3 { margin-bottom: 6px; color: #e0e0e0; }
+    #auth-box p { color: #888; font-size: 0.85rem; margin-bottom: 16px; }
+    #auth-box input { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid #333; background: #111; color: #e0e0e0; font-size: 1rem; outline: none; text-align: center; }
+    #auth-box input:focus { border-color: #667eea; }
+    #auth-error { color: #f7768e; font-size: 0.85rem; margin-top: 8px; min-height: 20px; }
+    #auth-box button { margin-top: 12px; padding: 12px 28px; border-radius: 12px; border: none; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; font-weight: 600; cursor: pointer; font-size: 1rem; }
+
+    /* GAME */
+    #game { gap: 20px; background: linear-gradient(to top, rgba(0,0,0,0.92), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1600&q=80') center/cover no-repeat fixed; }
+    #game h2 { font-size: 1.4rem; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    #game-info { color: #aaa; font-size: 0.9rem; }
+    #timer-bar { width: 300px; height: 8px; background: #222; border-radius: 4px; overflow: hidden; margin: 4px 0; }
+    #timer-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #667eea, #764ba2); transition: width 0.1s linear; border-radius: 4px; }
+    #click-count { font-size: 4rem; font-weight: 700; color: #fff; }
+    #click-label { color: #888; font-size: 0.85rem; }
+    #tap-zone { width: 260px; height: 260px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; transition: transform 0.06s; font-size: 1.5rem; color: #fff; font-weight: 700; }
+    #tap-zone:active { transform: scale(0.94); }
+    #tap-zone.waiting { background: linear-gradient(135deg, #333, #444); cursor: default; }
+    #tap-zone.done { background: linear-gradient(135deg, #9ece6a, #6aa34f); cursor: default; }
+    #start-btn, #replay-btn { padding: 14px 32px; border-radius: 14px; border: none; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    #replay-btn { display: none; }
+
+    /* LEADERBOARD */
+    #leaderboard { margin-top: 16px; width: 340px; }
+    #leaderboard h3 { text-align: center; margin-bottom: 10px; color: #ccc; font-size: 1rem; }
+    .lb-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-bottom: 6px; transition: all 0.3s; }
+    .lb-row.gold { background: rgba(255,215,0,0.12); border: 1px solid rgba(255,215,0,0.3); }
+    .lb-rank { font-weight: 700; width: 28px; }
+    .lb-name { flex: 1; margin-left: 8px; }
+    .lb-score { font-weight: 700; color: #667eea; }
+    .lb-no-score { color: #555; font-style: italic; }
+
     .color-karan { color: #667eea; }
     .color-shaoibul { color: #f7768e; }
     .color-diana { color: #9ece6a; }
     .color-mehr { color: #e0af68; }
+    .color-nandeesh { color: #7dcfff; }
+    .color-sahil { color: #bb9af7; }
 
-    #input-bar { padding: 12px 16px; background: #1a1a1a; border-top: 1px solid #2a2a2a; display: flex; gap: 10px; }
-    #input-bar input { flex: 1; padding: 12px 16px; border-radius: 24px; border: 1px solid #333; background: #111; color: #e0e0e0; font-size: 1rem; outline: none; }
-    #input-bar input:focus { border-color: #667eea; }
-    #input-bar button { padding: 12px 20px; border-radius: 24px; border: none; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; font-weight: 600; cursor: pointer; }
-    #input-bar button:hover { opacity: 0.9; }
+    #logout-btn { position: absolute; top: 16px; right: 20px; background: rgba(255,255,255,0.08); border: 1px solid #333; color: #aaa; padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 0.8rem; }
+    #logout-btn:hover { border-color: #f7768e; color: #f7768e; }
 
-    #messages::-webkit-scrollbar { width: 6px; }
-    #messages::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-    #online-bar { display: flex; gap: 10px; padding: 8px 20px; background: #141414; border-bottom: 1px solid #1e1e1e; }
-    .online-dot { width: 8px; height: 8px; border-radius: 50%; background: #333; display: inline-block; margin-right: 4px; vertical-align: middle; }
-    .online-dot.active { background: #9ece6a; }
-    .online-name { font-size: 0.78rem; color: #666; }
-    .online-name.active { color: #ccc; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.3s ease; }
   </style>
 </head>
 <body>
 
-  <div id="login">
-    <h1>KaiDash 💬</h1>
-    <p>Pick your name to join the chat</p>
+  <!-- LOGIN -->
+  <div id="login" class="screen active">
+    <h1>KaiDash 🎯</h1>
+    <p>Pick your name to play</p>
     <div class="name-grid">
-      <button class="name-btn" onclick="joinChat('Karan')">Karan</button>
-      <button class="name-btn" onclick="joinChat('Shaoibul')">Shaoibul</button>
-      <button class="name-btn" onclick="joinChat('Diana')">Diana</button>
-      <button class="name-btn" onclick="joinChat('Mehr')">Mehr</button>
+      <button class="name-btn" onclick="tryLogin('Karan')">Karan</button>
+      <button class="name-btn" onclick="tryLogin('Shaoibul')">Shaoibul</button>
+      <button class="name-btn" onclick="tryLogin('Diana')">Diana</button>
+      <button class="name-btn" onclick="tryLogin('Mehr')">Mehr</button>
+      <button class="name-btn" onclick="tryLogin('Nandeesh')">Nandeesh</button>
+      <button class="name-btn" onclick="tryLogin('Sahil')">Sahil</button>
     </div>
-    <p style="margin-top:20px; font-size:0.8rem; color:#555;">Built with ❤️ by StepAhead Academy</p>
+    <p style="margin-top:20px; font-size:0.8rem; color:#666;">Built with ❤️ by StepAhead Academy</p>
   </div>
 
-  <div id="chat">
-    <div id="chat-header">
-      <h2>KaiDash 💬</h2>
-      <span id="user-label"></span>
+  <!-- AUTH MODAL -->
+  <div id="auth-modal">
+    <div id="auth-box" class="fade-in">
+      <h3 id="auth-title">Verify yourself</h3>
+      <p>What's your last name?</p>
+      <input type="text" id="auth-input" placeholder="Last name..." autocomplete="off" />
+      <div id="auth-error"></div>
+      <button onclick="verifyAuth()">Enter</button>
     </div>
-    <div id="online-bar"></div>
-    <div id="messages"></div>
-    <div id="input-bar">
-      <input type="text" id="msg-input" placeholder="Type a message..." autocomplete="off" />
-      <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <!-- GAME -->
+  <div id="game" class="screen">
+    <button id="logout-btn" onclick="logout()">← Switch player</button>
+    <h2>KaiDash 🎯</h2>
+    <p id="game-info">Click the circle as fast as you can in 10 seconds!</p>
+    <div id="timer-bar"><div id="timer-fill"></div></div>
+    <div id="click-count">0</div>
+    <div id="click-label">clicks</div>
+    <div id="tap-zone" class="waiting" onclick="handleTap()">TAP!</div>
+    <button id="start-btn" onclick="startGame()">Start Game</button>
+    <button id="replay-btn" onclick="resetGame()">Play Again</button>
+    <div id="leaderboard">
+      <h3>🏆 Leaderboard</h3>
+      <div id="lb-rows"></div>
     </div>
   </div>
 
   <script>
-    const MEMBERS = ['Karan', 'Shaoibul', 'Diana', 'Mehr'];
-    const colors = { Karan: 'color-karan', Shaoibul: 'color-shaoibul', Diana: 'color-diana', Mehr: 'color-mehr' };
-    let currentUser = '';
-
-    // Demo greetings the "bots" will send
-    const demoReplies = {
-      Karan:    ["Yo! What's up team 🔥", "Let's gooo", "Haha nice one"],
-      Shaoibul: ["Salam everyone ✌️", "Sounds good!", "I'm in"],
-      Diana:    ["Hey hey! 👋", "Love that idea", "Totally agree"],
-      Mehr:     ["Hi all! 😊", "Cool cool", "Let's do it!"]
+    const MEMBERS = ['Karan', 'Shaoibul', 'Diana', 'Mehr', 'Nandeesh', 'Sahil'];
+    const COLORS = { Karan:'color-karan', Shaoibul:'color-shaoibul', Diana:'color-diana', Mehr:'color-mehr', Nandeesh:'color-nandeesh', Sahil:'color-sahil' };
+    const SECRETS = {
+      Karan: 'sharma',
+      Shaoibul: 'hoque',
+      Diana: 'fernandes',
+      Mehr: 'patni',
+      Nandeesh: 'kumar',
+      Sahil: 'modi'
     };
+    const MEDALS = ['🥇', '🥈', '🥉', '4.', '5.', '6.'];
 
-    function joinChat(name) {
-      currentUser = name;
-      document.getElementById('login').style.display = 'none';
-      document.getElementById('chat').style.display = 'flex';
-      document.getElementById('user-label').textContent = 'Logged in as ' + name;
+    let currentUser = '';
+    let clickCount = 0;
+    let gameActive = false;
+    let gameTimer = null;
+    let timeLeft = 10;
 
-      renderOnlineBar();
-      renderMessage({ user: 'system', text: name + ' joined the chat' });
-
-      // Simulate others joining after a delay
-      const others = MEMBERS.filter(m => m !== name);
-      others.forEach((m, i) => {
-        setTimeout(() => {
-          renderMessage({ user: 'system', text: m + ' joined the chat' });
-          markOnline(m);
-        }, 1000 + i * 800);
-      });
-
-      // Others say hello
-      others.forEach((m, i) => {
-        setTimeout(() => {
-          renderMessage({ user: m, text: demoReplies[m][0] });
-        }, 3000 + i * 1200);
-      });
-
-      document.getElementById('msg-input').focus();
+    // Scores stored in localStorage so they persist across refreshes
+    function getScores() {
+      try { return JSON.parse(localStorage.getItem('kaidash_scores') || '{}'); } catch { return {}; }
+    }
+    function saveScore(name, score) {
+      const scores = getScores();
+      if (!scores[name] || score > scores[name]) scores[name] = score;
+      localStorage.setItem('kaidash_scores', JSON.stringify(scores));
     }
 
-    function renderOnlineBar() {
-      const bar = document.getElementById('online-bar');
-      bar.innerHTML = MEMBERS.map(m =>
-        '<span class="online-name" id="online-' + m + '">' +
-        '<span class="online-dot' + (m === currentUser ? ' active' : '') + '" id="dot-' + m + '"></span>' +
-        m + '</span>'
-      ).join('');
+    // LOGIN + AUTH
+    let pendingUser = '';
+    function tryLogin(name) {
+      pendingUser = name;
+      document.getElementById('auth-title').textContent = 'Hey ' + name + '!';
+      document.getElementById('auth-input').value = '';
+      document.getElementById('auth-error').textContent = '';
+      document.getElementById('auth-modal').classList.add('active');
+      setTimeout(() => document.getElementById('auth-input').focus(), 100);
     }
 
-    function markOnline(name) {
-      const dot = document.getElementById('dot-' + name);
-      const label = document.getElementById('online-' + name);
-      if (dot) dot.classList.add('active');
-      if (label) label.classList.add('active');
-    }
-
-    function renderMessage(m) {
-      const div = document.createElement('div');
-      if (m.user === 'system') {
-        div.className = 'msg system';
-        div.textContent = m.text;
-      } else {
-        const isMine = m.user === currentUser;
-        div.className = 'msg ' + (isMine ? 'mine' : 'theirs');
-        div.innerHTML = '<div class="author ' + (colors[m.user] || '') + '">' + m.user + '</div>' + escapeHtml(m.text);
-      }
-      const container = document.getElementById('messages');
-      container.appendChild(div);
-      container.scrollTop = container.scrollHeight;
-    }
-
-    function sendMessage() {
-      const input = document.getElementById('msg-input');
-      const text = input.value.trim();
-      if (!text) return;
-      renderMessage({ user: currentUser, text: text });
-      input.value = '';
-      input.focus();
-
-      // Random team member replies after a short delay
-      const others = MEMBERS.filter(m => m !== currentUser);
-      const responder = others[Math.floor(Math.random() * others.length)];
-      const pool = demoReplies[responder];
-      const reply = pool[Math.floor(Math.random() * pool.length)];
-      setTimeout(() => renderMessage({ user: responder, text: reply }), 800 + Math.random() * 1500);
-    }
-
-    document.getElementById('msg-input').addEventListener('keydown', e => {
-      if (e.key === 'Enter') sendMessage();
+    document.getElementById('auth-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') verifyAuth();
     });
 
-    function escapeHtml(t) {
-      const d = document.createElement('div');
-      d.textContent = t;
-      return d.innerHTML;
+    function verifyAuth() {
+      const input = document.getElementById('auth-input').value.trim().toLowerCase();
+      if (input === SECRETS[pendingUser]) {
+        currentUser = pendingUser;
+        document.getElementById('auth-modal').classList.remove('active');
+        showScreen('game');
+        resetGame();
+      } else {
+        document.getElementById('auth-error').textContent = 'Wrong last name. Try again!';
+        document.getElementById('auth-input').value = '';
+        document.getElementById('auth-input').focus();
+      }
+    }
+
+    function logout() {
+      currentUser = '';
+      gameActive = false;
+      clearInterval(gameTimer);
+      showScreen('login');
+    }
+
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    // GAME
+    function startGame() {
+      clickCount = 0;
+      timeLeft = 10;
+      gameActive = true;
+      document.getElementById('click-count').textContent = '0';
+      document.getElementById('start-btn').style.display = 'none';
+      document.getElementById('replay-btn').style.display = 'none';
+      document.getElementById('tap-zone').classList.remove('waiting', 'done');
+      document.getElementById('tap-zone').textContent = 'TAP!';
+      document.getElementById('timer-fill').style.width = '100%';
+      document.getElementById('game-info').textContent = 'GO GO GO! 🔥';
+
+      gameTimer = setInterval(() => {
+        timeLeft -= 0.1;
+        document.getElementById('timer-fill').style.width = Math.max(0, (timeLeft / 10) * 100) + '%';
+        if (timeLeft <= 0) {
+          endGame();
+        }
+      }, 100);
+    }
+
+    function handleTap() {
+      if (!gameActive) return;
+      clickCount++;
+      document.getElementById('click-count').textContent = clickCount;
+      document.getElementById('tap-zone').style.transform = 'scale(0.92)';
+      setTimeout(() => document.getElementById('tap-zone').style.transform = '', 60);
+    }
+
+    function endGame() {
+      gameActive = false;
+      clearInterval(gameTimer);
+      document.getElementById('timer-fill').style.width = '0%';
+      document.getElementById('tap-zone').classList.add('done');
+      document.getElementById('tap-zone').textContent = '✅ ' + clickCount;
+      document.getElementById('game-info').textContent = currentUser + ' scored ' + clickCount + ' clicks!';
+      document.getElementById('replay-btn').style.display = 'inline-block';
+
+      saveScore(currentUser, clickCount);
+      renderLeaderboard();
+    }
+
+    function resetGame() {
+      clickCount = 0;
+      gameActive = false;
+      document.getElementById('click-count').textContent = '0';
+      document.getElementById('tap-zone').classList.add('waiting');
+      document.getElementById('tap-zone').classList.remove('done');
+      document.getElementById('tap-zone').textContent = 'TAP!';
+      document.getElementById('timer-fill').style.width = '100%';
+      document.getElementById('start-btn').style.display = 'inline-block';
+      document.getElementById('replay-btn').style.display = 'none';
+      document.getElementById('game-info').textContent = 'Click the circle as fast as you can in 10 seconds!';
+      renderLeaderboard();
+    }
+
+    function renderLeaderboard() {
+      const scores = getScores();
+      const sorted = MEMBERS.map(m => ({ name: m, score: scores[m] || null }))
+        .sort((a, b) => (b.score || 0) - (a.score || 0));
+
+      const html = sorted.map((p, i) => {
+        const isGold = i === 0 && p.score;
+        return '<div class="lb-row' + (isGold ? ' gold' : '') + ' fade-in">' +
+          '<span class="lb-rank">' + MEDALS[i] + '</span>' +
+          '<span class="lb-name ' + (COLORS[p.name] || '') + '">' + p.name + '</span>' +
+          (p.score ? '<span class="lb-score">' + p.score + ' clicks</span>' : '<span class="lb-no-score">—</span>') +
+          '</div>';
+      }).join('');
+
+      document.getElementById('lb-rows').innerHTML = html;
     }
   </script>
 </body>
